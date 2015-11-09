@@ -18,6 +18,7 @@ class letschat::app (
   $cookie          = $letschat::params::cookie,
   $authproviders   = $letschat::params::authproviders,
   $registration    = $letschat::params::registration,
+  $managerepo      = $letschat::params::managerepo,
 ) inherits letschat::params {
 
   $dependencies = ['g++', 'make', 'git', 'curl', 'vim', 'libkrb5-dev']
@@ -29,7 +30,7 @@ class letschat::app (
     ensure => present,
     before => Class['nodejs'],
   }
-
+if $managerepo {
   vcsrepo { $deploy_dir:
     ensure   => present,
     provider => git,
@@ -41,7 +42,13 @@ class letschat::app (
     ensure  => present,
     require => Vcsrepo[$deploy_dir],
   }
-
+}
+else {
+  package { 'dnsmasq':
+    ensure  => present,
+    require => Class['nodejs'],
+  }
+}
   file { '/etc/dnsmasq.d/10-consul':
     ensure  => present,
     content => 'server=/consul/127.0.0.1#8600',

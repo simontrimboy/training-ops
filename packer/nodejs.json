@@ -24,6 +24,11 @@
         "script": "scripts/nodejs.sh"
     },
     {
+        "type": "file",
+        "source": "app",
+        "destination": "/etc/letschat"
+    },
+    {
         "type": "shell",
         "script": "scripts/consul.sh"
     },
