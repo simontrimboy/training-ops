@@ -2,7 +2,7 @@
     "variables": {
         "aws_access_key": "{{env `aws_access_key`}}",
         "aws_secret_key": "{{env `aws_secret_key`}}",
-        "atlas_username": "{{env `atlas_username`}}"
+        "atlas_username": "ATLAS_ACCOUNT_NAME"
     },
     "builders": [{
         "type": "amazon-ebs",
@@ -24,11 +24,25 @@
         "script": "scripts/mongodb.sh"
     },
     {
-	"type": "puppet-masterless",
-	"manifest_file": "puppet/manifests/mongodb.pp",
-	"module_paths": ["puppet/modules/"]
+        "type": "shell",
+        "script": "scripts/consul.sh"
+    },
+    {
+        "type": "file",
+        "source": "files/mongodb.json",
+        "destination": "/etc/consul.d/mongodb.json"
+    },
+    {
+        "type": "file",
+        "source": "files/consul_client.conf",
+        "destination": "/etc/init/consul.conf"
+    },
+    {
+        "type": "puppet-masterless",
+        "manifest_file": "puppet/manifests/mongodb.pp",
+        "module_paths": ["puppet/modules/"]
     }
-    ],
+    ], 
     "post-processors": [
       {
         "type": "atlas",

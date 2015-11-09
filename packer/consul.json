@@ -12,41 +12,32 @@
         "source_ami": "ami-cf5beba4",
         "instance_type": "t2.micro",
         "ssh_username": "ubuntu",
-        "ami_name": "nodejs {{timestamp}}"
+        "ami_name": "consul {{timestamp}}"
     }],
     "push": {
-      "name": "{{user `atlas_username`}}/nodejs",
+      "name": "{{user `atlas_username`}}/consul",
       "vcs": false
     },
     "provisioners": [
-    {
-        "type": "shell",
-        "script": "scripts/nodejs.sh"
-    },
     {
         "type": "shell",
         "script": "scripts/consul.sh"
     },
     {
         "type": "file",
-        "source": "files/nodejs.json",
-        "destination": "/etc/consul.d/nodejs.json"
+        "source": "files/consul.json",
+        "destination": "/etc/consul.d/consul.json"
     },
     {
         "type": "file",
-        "source": "files/consul_client.conf",
+        "source": "files/consul_server.conf",
         "destination": "/etc/init/consul.conf"
-    },
-    {
-        "type": "puppet-masterless",
-        "manifest_file": "puppet/manifests/nodejs.pp",
-        "module_paths": ["puppet/modules/"]
     }
     ],  
     "post-processors": [
       {
         "type": "atlas",
-        "artifact": "{{user `atlas_username`}}/nodejs",
+        "artifact": "{{user `atlas_username`}}/consul",
         "artifact_type": "aws.ami",
         "metadata": {
           "created_at": "{{timestamp}}"
