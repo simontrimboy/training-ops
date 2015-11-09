@@ -187,6 +187,7 @@ resource "aws_instance" "nodejs" {
   tags { Name = "${var.name}-nodejs" }
   lifecycle { create_before_destroy = true }
   depends_on = ["aws_instance.mongodb"]
+  count      = 2
 }
 
 //Consul Security Group
@@ -236,6 +237,33 @@ resource "aws_instance" "consul" {
   count		  = "3"
 }
 
-output "letschat_address" {
-  value = "http://${aws_instance.nodejs.public_ip}:5000"
+//HAPROXY Security Group
+resource "aws_security_group" "haproxy" {
+  name   = "haproxy"
+  vpc_id = "${aws_vpc.vpc.id}"
+
+  tags { Name = "${var.name}-haproxy" }
+
+  ingress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  // allow traffic for SSH
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  // connect to scada
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 }

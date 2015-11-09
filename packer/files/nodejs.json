@@ -1,8 +1,15 @@
 {
     "leave_on_terminate": true,
     "service": {
-        "name": "web",
-        "port": 5000,
-        "tags": ["nodejs"]
+      "name": "web",
+      "port": 5000,
+      "tags": ["nodejs"],
+      "check": {
+        "id": "letschat",
+        "name": "Let's Chat running on port 5000",
+        "http": "http://localhost:5000",
+        "interval": "10s",
+        "timeout": "1s"
+      }
     }
 }
