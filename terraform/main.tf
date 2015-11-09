@@ -20,6 +20,13 @@ resource "atlas_artifact" "nodejs" {
   lifecycle { create_before_destroy = true }
 }
 
+resource "atlas_artifact" "consul" {
+  name = "${var.atlas_username}/consul"
+  type = "aws.ami"
+
+  lifecycle { create_before_destroy = true }
+}
+
 // TEMPLATES
 resource "template_file" "consul_upstart" {
   filename = "files/consul.sh"
@@ -211,6 +218,22 @@ resource "aws_security_group" "consul" {
     to_port     = 0
     cidr_blocks = ["0.0.0.0/0"]
   }
+}
+
+//Consul Instance
+resource "aws_instance" "consul" {
+  ami             = "${atlas_artifact.consul.metadata_full.region-us-east-1}"
+  user_data       = "${template_file.consul_upstart.rendered}"
+  instance_type   = "t2.micro"
+  key_name        = "${module.ssh_keys.key_name}"
+  subnet_id       = "${aws_subnet.public.id}"
+  
+  vpc_security_group_ids = ["${aws_security_group.consul.id}"]
+
+  tags { Name = "${var.name}-consul" }
+  lifecycle { create_before_destroy = true }
+  
+  count		  = "3"
 }
 
 output "letschat_address" {
