@@ -27,6 +27,11 @@ resource "atlas_artifact" "consul" {
   lifecycle { create_before_destroy = true }
 }
 
+resource "atlas_artifact" "haproxy" {
+  name = "${var.atlas_username}/haproxy"
+  type = "aws.ami"
+}
+
 // TEMPLATES
 resource "template_file" "consul_upstart" {
   filename = "files/consul.sh"
@@ -266,4 +271,24 @@ resource "aws_security_group" "haproxy" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
+}
+
+//HAPROXY Instance
+resource "aws_instance" "haproxy" {
+  ami             = "${atlas_artifact.haproxy.metadata_full.region-us-east-1}"
+  user_data       = "${template_file.consul_upstart.rendered}"
+  instance_type   = "t2.micro"
+  key_name        = "${module.ssh_keys.key_name}"
+  subnet_id       = "${aws_subnet.public.id}"
+
+  vpc_security_group_ids = ["${aws_security_group.haproxy.id}"]
+
+  tags { Name = "${var.name}-haproxy" }
+  lifecycle { create_before_destroy = true }
+
+  count           = "1"
+}
+
+output "letschat_address" {
+  value = "http://${aws_instance.haproxy.public_ip}"
 }
