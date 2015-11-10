@@ -5,7 +5,7 @@ provider "aws" {
   region     = "us-east-1"
 }
 
-// SSH Keys
+// SSH Keys change
 module "ssh_keys" {
   source = "./ssh_keys"
 
